@@ -19,19 +19,20 @@ main = scotty 3000 $ do
     a <- liftAndCatchIO hello
     text $ pack a
 
-  get "/todos" $ json first
+  get "/todos" $ do
+    a <- liftAndCatchIO $ getC "todos"
+    text $ pack a
 
   post "/user/register" $ do
     b <- decodeUtf8 <$> body
     text $ b
 
-
   post "/todos" $ do
     b <- jsonData
-    json (b :: Todo)
-
-  put "/todos/:id" $ do
-    text "edit todo"
+    a <- liftAndCatchIO $ insertC (b :: Todo) "todos"
+    text "asd"
 
   delete "/todos/:id" $ do
-    text "delete todo"
+    a <- param "id"
+    c <- liftAndCatchIO $ deleteById a "todos"
+    text $ pack a

@@ -32,8 +32,10 @@ instance ToJSON User
 instance FromJSON User
 instance BSONObj User where
   getCollection User {userId = _, userName = _, password = _} = "users"
-  toDocument User {userId = _, userName = uN, password = pw} =
-    ["userName" =: (pack uN), "password" =: (pack pw)]
+  toDocument User {userId = Nothing, userName = uN, password = pw} =
+                                                            ["userName" =: (pack uN), "password" =: (pack pw)]
+  toDocument User {userId = Just a, userName = uN, password = pw} =
+                                                            ["_id" =: (pack a), "userName" =: (pack uN), "password" =: (pack pw)]
   fromDocument a = User { userId = Just $ show $ getObjId a,
                           userName = getString "userName" a,
                           password = getString "password" a}
@@ -49,8 +51,10 @@ instance ToJSON Todo
 instance FromJSON Todo
 instance BSONObj Todo where
   getCollection Todo {todoId = _, title = _, description = _, done = _} = "users"
-  toDocument Todo {todoId = _, title = title, description = desc, done = dn} =
+  toDocument Todo {todoId = Nothing, title = title, description = desc, done = dn} =
     ["title" =: (pack title), "description" =: (pack desc), "done" =: dn]
+  toDocument Todo {todoId = Just a, title = title, description = desc, done = dn} =
+    ["_id" =: (pack a), "title" =: (pack title), "description" =: (pack desc), "done" =: dn]
   fromDocument a = Todo { todoId = Just $ show $ getObjId a,
                           title = getString "todoId" a,
                           description = getString "description" a,
