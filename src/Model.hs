@@ -3,7 +3,7 @@
 
 module Model where
 
-import Data.Aeson (ToJSON, FromJSON)
+import Data.Aeson (ToJSON, FromJSON, toJSON)
 import GHC.Generics (Generic)
 import Database.MongoDB
 import Data.Text (pack)
@@ -41,25 +41,24 @@ instance BSONObj User where
                           password = getString "password" a}
 
 
-
-
-data Todo = Todo { todoId :: Maybe String, title :: String,
-                    description :: String, done :: Bool }
+data Todo = Todo { todoId :: Maybe String, content :: String, done :: Bool }
                     deriving (Show, Generic)
 
 instance ToJSON Todo
 instance FromJSON Todo
 instance BSONObj Todo where
-  getCollection Todo {todoId = _, title = _, description = _, done = _} = "users"
-  toDocument Todo {todoId = Nothing, title = title, description = desc, done = dn} =
-    ["title" =: (pack title), "description" =: (pack desc), "done" =: dn]
-  toDocument Todo {todoId = Just a, title = title, description = desc, done = dn} =
-    ["_id" =: (pack a), "title" =: (pack title), "description" =: (pack desc), "done" =: dn]
+  getCollection Todo {todoId = _, content = _, done = _} = "users"
+  toDocument Todo {todoId = Nothing, content = content, done = dn} =
+    ["content" =: (pack content), "done" =: dn]
+  toDocument Todo {todoId = Just a, content = content, done = dn} =
+    ["_id" =: (pack a), "content" =: (pack content), "done" =: dn]
   fromDocument a = Todo { todoId = Just $ show $ getObjId a,
-                          title = getString "todoId" a,
-                          description = getString "description" a,
+                          content = getString "content" a,
                           done = getBoolean "done" a}
 
+removeId document = exclude ["_id"] document
+
+updateId a document = merge ["_id" =: ((read a) :: ObjectId)] $ toDocument document
+
 first :: Todo
-first = Todo { todoId = Nothing, title = "asd",
-                description = "asdasd", done = False }
+first = Todo { todoId = Nothing, content = "asd", done = False }
